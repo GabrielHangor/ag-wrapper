@@ -1,0 +1,1 @@
+/// <reference columnDefinitions="vite/client" />

@@ -1,0 +1,67 @@
+@import "ag-grid-community/styles/ag-grid.min.css";
+@import "ag-grid-community/styles/ag-theme-alpine.min.css";
+
+.ag-theme-alpine {
+  /*  header  */
+  --ag-header-background-color: transparent;
+
+  /* rows */
+  --ag-row-hover-color: transparent;
+  --ag-odd-row-background-color: transparent;
+  --ag-selected-row-background-color: #f1f1f8;
+  --ag-cell-horizontal-padding: 5px;
+
+  .ag-floating-bottom {
+    overflow-y: hidden !important;
+  }
+
+  .ag-horizontal-left-spacer {
+    min-width: 0 !important;
+  }
+
+  /* borders */
+  --ag-border-radius: 0;
+  --ag-input-focus-border-color: var(--ag-alpine-active-color);
+  --ag-header-column-resize-handle-height: 80%;
+  --ag-border-color: transparent;
+  --ag-input-focus-box-shadow: none;
+
+  /* font */
+  --ag-font-family: Open Sans, sans-serif;
+  --ag-font-size: 14px;
+
+  /* textarea-editor */
+
+  .ag-large-text {
+    padding: 0;
+    box-shadow: none;
+
+    .ag-large-text-input {
+      padding: 0;
+    }
+  }
+
+  /* cells */
+  .ag-textarea-renderer {
+    overflow: hidden;
+    max-height: 60px;
+    white-space: pre-wrap;
+    line-height: 13px;
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+
+  .invalid-cell {
+    background-color: rgb(255, 188, 188);
+  }
+
+  .cell-changed:not(.invalid-cell, .total-cell) {
+    background-color: #e5f3f7;
+  }
+
+  .total-cell {
+    background-color: #f3f3f3;
+  }
+}
