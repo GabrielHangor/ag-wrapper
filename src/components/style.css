@@ -4,8 +4,16 @@
 .ag-theme-alpine {
   /*  header  */
   --ag-header-background-color: transparent;
+  --ag-header-foreground-color: #424242;
 
-  /* rows */
+  /* background */
+  --ag-background-color: #fafafa;
+  .ag-header-row {
+    font-weight: 400;
+    letter-spacing: 0.0333333333em;
+    font-size: 0.75rem;
+    line-height: 1.1;
+  } /* rows */
   --ag-row-hover-color: transparent;
   --ag-odd-row-background-color: transparent;
   --ag-selected-row-background-color: #f1f1f8;
@@ -31,7 +39,6 @@
   --ag-font-size: 14px;
 
   /* textarea-editor */
-
   .ag-large-text {
     padding: 0;
     box-shadow: none;
@@ -53,6 +60,10 @@
     -webkit-box-orient: vertical;
   }
 
+  .ag-checkbox-input {
+    cursor: pointer;
+  }
+
   .invalid-cell {
     background-color: rgb(255, 188, 188);
   }
@@ -63,5 +74,15 @@
 
   .total-cell {
     background-color: #f3f3f3;
+    font-weight: bold;
+    color: black !important;
+
+    &:first-child {
+      overflow: visible;
+    }
+  }
+
+  .non-editable {
+    color: gray;
   }
 }

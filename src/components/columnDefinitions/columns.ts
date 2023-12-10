@@ -1,8 +1,9 @@
-import type { AgTableColumn, AgTableColumnType } from "@/components/columnDefinitions/types.ts";
+import type { AgTableColumnType, AgTableColumn } from "../types";
 
 export const columnTypes: Partial<Record<AgTableColumnType, AgTableColumn>> = {
   rowSelection: {
-    colId: "rowSelection",
+    field: "rowSelection",
+    headerName: "",
     checkboxSelection: true,
     maxWidth: 40,
     resizable: false,
@@ -12,15 +13,18 @@ export const columnTypes: Partial<Record<AgTableColumnType, AgTableColumn>> = {
     editable: false,
     cellStyle: { border: "none" }
   },
-  textArea: {
+  textarea: {
     cellEditor: "agLargeTextCellEditor",
     cellClass: "ag-textarea-renderer"
+  },
+  dropdown: {
+    cellEditor: "agSelectCellEditor",
+    cellEditorParams: { values: [1,2,3] },
+    cellDataType: "string"
   },
   date: {
     valueFormatter: (params) => (params.value ? new Date(params.value).toLocaleDateString() : ""),
     valueParser: (params) => {
-      console.log(params.oldValue);
-
       if (!params.newValue) return null;
 
       const dateMatch = params.newValue.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -34,8 +38,15 @@ export const columnTypes: Partial<Record<AgTableColumnType, AgTableColumn>> = {
     },
     cellEditor: "agDateCellEditor"
   },
-  number: {
-    valueFormatter: (params) => params.value?.toFixed(2)
-  },
-  string: {}
+  numeric: {
+    valueFormatter: (params) => {
+      if (params.value !== null && params.value !== undefined) {
+        return parseFloat(params.value)
+          .toFixed(2)
+          .replace(/\d(?=(\d{3})+\.)/g, "$& ");
+      } else {
+        return "";
+      }
+    }
+  }
 };

@@ -1,78 +1,84 @@
 <template>
   <button @click="refetch">refetch</button>
-  <AgDataGridWrapper :data="dataSource" :columns="columns" />
+  <button @click="addRow">add new row</button>
+  <AgDataGridWrapper :data="dataSource" :columns="columns" @initialized="(api) => (agGridInstance = api)" />
 </template>
 
 <script setup lang="ts">
 import AgDataGridWrapper from "./components/AgDatagridWrapper.ce.vue";
-import { onMounted } from "vue";
-import { shallowRef } from "vue";
-import type { AgTableColumn, AgTableRowData } from "@/components/columnDefinitions/types.ts";
+import { onMounted, ref, shallowRef } from "vue";
+
+import type { RowDataTransaction } from "ag-grid-community";
+import type { AgTableRowData, AgTableColumn, AgGridApi } from "./components/types";
+import type { CellValueChangedEvent } from "ag-grid-community";
+import type { ColDef } from "ag-grid-community";
 
 const dataSource = shallowRef<AgTableRowData>([]);
 const columns = shallowRef<AgTableColumn[]>([]);
+const agGridInstance = ref<AgGridApi | null>(null);
 
-function refetch() {
-  generateRowData();
+async function refetch() {
+  await generateRowData();
 }
 
-onMounted(() => {
-  generateColumnDefs();
-  generateRowData();
+onMounted(async () => {
+  await Promise.all([generateColumnDefs(), generateRowData()]);
 });
 
-function generateColumnDefs() {
-  const columnDefs: AgTableColumn[] = [];
+async function generateColumnDefs() {
+  const columnsRaw = (await import("./mockData/columns.json")).default;
 
-  for (let i = 0; i < 100; i++) {
-    let type;
-    const rand = Math.random();
-    if (rand < 0.25) {
-      type = "string";
-    } else if (rand < 0.5) {
-      type = "date";
-    } else if (rand < 0.75) {
-      type = "textArea";
-    } else {
-      type = "number";
-    }
+  columns.value = columnsRaw.map((column) => {
+    return {
+      field: column.data,
+      headerName: column.title,
+      editable: (params) => {
+        return !column.settings.readOnly && !params.node.isRowPinned();
+      },
+      width: column?.settings.width,
+      type: column?.settings.type,
 
-    columnDefs.push({
-      headerName: `Column ${i}, type: ${type}`,
-      field: `field${i}`,
-      type: type
-    });
-  }
-
-  columns.value = columnDefs;
+    } as AgTableColumn;
+  });
 }
 
-function generateRowData() {
-  const rowData: AgTableRowData[] = [];
+async function generateRowData() {
+  const dataRaw = (await import("./mockData/placement.json")).default;
+  dataSource.value = Array.from({ length: 5 }, () => JSON.parse(JSON.stringify(dataRaw))).flat();
+}
 
-  for (let i = 0; i < 100; i++) {
-    const row: any = {};
-    for (let j = 0; j < columns.value.length; j++) {
-      const columnType = columns.value[j].type;
+async function addRow() {
+  const newRow = { danboId: 5, agencyId: 10 };
+  const transaction: RowDataTransaction = { add: [newRow] };
 
-      if (j === 0 && columnType === "rowSelection") {
-        continue;
+  const result = agGridInstance.value?.applyTransaction(transaction);
+  const newNode = result?.add[0];
+
+  if (newNode) {
+    const columns = agGridInstance.value?.getColumnDefs() as ColDef[];
+
+    columns?.forEach((colDef) => {
+      if (colDef.field) {
+        const params = {
+          node: newNode,
+          data: newRow,
+          column: { getColId: () => colDef.field },
+          colDef: colDef,
+          value: newRow[colDef.field],
+          api: agGridInstance.value,
+          type: colDef.type
+        };
+
+        agGridInstance.value?.validateCell(params as CellValueChangedEvent);
+        agGridInstance.value?.reflectCellChanges(params as CellValueChangedEvent);
       }
+    });
 
-      if (columnType === "string") {
-        row[`field${j}`] = `Test${i}`;
-      } else if (columnType === "textArea") {
-        row[`field${j}`] =
-          `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.`;
-      } else if (columnType === "date") {
-        row[`field${j}`] = new Date(2022, 0, i + 1).toISOString();
-      } else if (columnType === "number") {
-        row[`field${j}`] = i;
-      }
-    }
-    rowData.push(row);
+    agGridInstance.value?.refreshCells({
+      rowNodes: [newNode],
+      force: true,
+      suppressFlash: true
+    });
   }
-
-  dataSource.value = rowData;
 }
 </script>

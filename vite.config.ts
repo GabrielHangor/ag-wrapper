@@ -11,7 +11,8 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, "src/lib/index.ts"),
       name: "TestComponent",
-      fileName: "TestComponent"
+      fileName: "TestComponent",
+  
     }
   },
   resolve: {
